@@ -11,7 +11,7 @@ import UIKit
 /* The working area, used by the fitness function to determine an individuals
 * fitness.
 */
-var workingData: Array<CUnsignedChar> = []
+var workingData: UnsafeBufferPointer<CUnsignedChar>!
 
 /* Genetics options.
 */
@@ -281,7 +281,7 @@ func CGImageFromUIView(view: UIView) -> CGImage {
     return image.CGImage
 }
 
-func rawDataFromCGImage(image: CGImage) -> [CUnsignedChar] {
+func rawDataFromCGImage(image: CGImage) -> UnsafeBufferPointer<CUnsignedChar> {
     
     let width = CGImageGetWidth(image)
     let height = CGImageGetHeight(image)
@@ -307,25 +307,10 @@ func rawDataFromCGImage(image: CGImage) -> [CUnsignedChar] {
     
     CGContextDrawImage(context, CGRectMake(0, 0, CGFloat(width), CGFloat(height)), image);
     
-    //TODO: simplify conversions
-    
-    let data = NSData(bytes: rawData, length: size)
-    
-    var array = Array(count: size, repeatedValue: CUnsignedChar(0))
-    
-    // copy bytes into array
-    data.getBytes(&array, length:size * sizeof(CUnsignedChar))
-    
+    let buffer = UnsafeBufferPointer(start: rawData, count: size)
     rawData.destroy()
-    //    for (var i = 0; i < size; i += Int(bytesPerPixel)) {
-    //        if i % Int(bytesPerRow) == 0 {
-    //            println()
-    //        }
-    //        print(rawData[i]) //R
-    //        print(" ")
-    //    }
     
-    return array
+    return buffer
 }
 
 typealias Population = [Individual]
