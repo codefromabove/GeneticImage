@@ -13,6 +13,7 @@
 		2E52A3B01A374AEA006DBA80 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2E52A3AF1A374AEA006DBA80 /* Images.xcassets */; };
 		2E52A3B31A374AEA006DBA80 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2E52A3B11A374AEA006DBA80 /* LaunchScreen.xib */; };
 		2E52A3BF1A374AEA006DBA80 /* GeneticImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E52A3BE1A374AEA006DBA80 /* GeneticImageTests.swift */; };
+		2E52A3C91A374B03006DBA80 /* kyle.png in Resources */ = {isa = PBXBuildFile; fileRef = 2E52A3C81A374B03006DBA80 /* kyle.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,6 +37,7 @@
 		2E52A3B81A374AEA006DBA80 /* GeneticImageTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GeneticImageTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E52A3BD1A374AEA006DBA80 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2E52A3BE1A374AEA006DBA80 /* GeneticImageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneticImageTests.swift; sourceTree = "<group>"; };
+		2E52A3C81A374B03006DBA80 /* kyle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = kyle.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +79,7 @@
 		2E52A3A51A374AEA006DBA80 /* GeneticImage */ = {
 			isa = PBXGroup;
 			children = (
+				2E52A3C81A374B03006DBA80 /* kyle.png */,
 				2E52A3A81A374AEA006DBA80 /* AppDelegate.swift */,
 				2E52A3AA1A374AEA006DBA80 /* ViewController.swift */,
 				2E52A3AC1A374AEA006DBA80 /* Main.storyboard */,
@@ -192,6 +195,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2E52A3C91A374B03006DBA80 /* kyle.png in Resources */,
 				2E52A3AE1A374AEA006DBA80 /* Main.storyboard in Resources */,
 				2E52A3B31A374AEA006DBA80 /* LaunchScreen.xib in Resources */,
 				2E52A3B01A374AEA006DBA80 /* Images.xcassets in Resources */,
