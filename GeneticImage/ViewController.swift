@@ -177,7 +177,7 @@ struct Individual {
 func seed(var population: Population) -> Population {
     if population.count > 1 {
         let size = population.count
-        var offspring: Population = []
+        var offspring: Population = [] //TODO: prepopulate with values
         
         /* The number of individuals from the current generation to select for
         * breeding
@@ -250,7 +250,7 @@ class Canvas: UIView {
     override func drawRect(rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
         // ind?.draw(context, rect: rect)
-        ind?.draw(context, rect: CGRectMake(0, 0, CGFloat(70), CGFloat(70)))
+        ind?.draw(context, rect: CGRectMake(0, 0, CGFloat(350), CGFloat(350)))
     }
 }
 
@@ -340,8 +340,8 @@ class ViewController: UIViewController {
         lowestFitness = min(currentFitness, lowestFitness)
         highestFitness = max(currentFitness, highestFitness)
         
-        let canvas = view as Canvas
         
+        let canvas = view as Canvas
         println(mostFittest.fitness)
         canvas.ind = mostFittest
         canvas.setNeedsDisplay()
