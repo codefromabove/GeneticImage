@@ -75,6 +75,7 @@ struct Individual {
     }
     
     init(mother: [Float], father: [Float]) {
+        //dna = Array(count: dnaLength, repeatedValue: 0.0)
         dna = []
         let inheritSplit = Int(_random() * Float(dnaLength))
         
@@ -89,16 +90,16 @@ struct Individual {
             }
             
             for (var j = 0; j < geneSize; j++) {
-                var dna = inheritedGene[i + j]
+                var d = inheritedGene[i + j]
                 
                 if _random() < mutationChance {
-                    dna += _random() * mutateAmount * 2 - mutateAmount
+                    d += _random() * mutateAmount * 2 - mutateAmount
                     
-                    if dna < 0.0 { dna = 0.0 }
-                    if dna > 1.0 { dna = 1.0 }
+                    if d < 0.0 { d = 0.0 }
+                    if d > 1.0 { d = 1.0 }
                 }
                 
-                self.dna.append(dna)
+                dna.append(d)
             }
         }
         calcFitness()
@@ -187,14 +188,14 @@ func seed(var population: Population) -> Population {
         /* The number of individuals to randomly generate */
         var randCount = Int(ceil(1.0 / selectionCutoff))
         
-        population = population.sorted { $0.fitness > $1.fitness }
+        population.sort { $0.fitness > $1.fitness }
         
         if fittestSurvive {
-            randCount-=1
+            randCount -= 1
         }
         
-        for (var i = 0; i < selectCount; i++) {
-            for (var j = 0; j < randCount; j++) {
+        for var i = 0; i < selectCount; i++ {
+            for var j = 0; j < randCount; j++ {
                 var randIndividual = i
                 
                 while randIndividual == i {
@@ -208,7 +209,7 @@ func seed(var population: Population) -> Population {
             population = Array(population[0..<selectCount])
             population.extend(offspring)
         } else {
-            population = offspring
+            return offspring
         }
         population = Array(population[0..<size])
     } else {
@@ -249,8 +250,7 @@ class Canvas: UIView {
     
     override func drawRect(rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
-        // ind?.draw(context, rect: rect)
-        ind?.draw(context, rect: CGRectMake(0, 0, CGFloat(350), CGFloat(350)))
+        ind?.draw(context, rect: rect)
     }
 }
 
@@ -317,12 +317,14 @@ typealias Population = [Individual]
 
 class ViewController: UIViewController {
     
+    @IBOutlet weak var referenceImageView: UIImageView!
+    @IBOutlet weak var canvasView: Canvas!
+    
     var population: Population!
-    override func loadView() {
-        view = Canvas()
-    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        referenceImageView.image = UIImage(named: "kyle")
         
         prepareImage()
         population = (0..<populationSize).map { _ in Individual() }
@@ -340,11 +342,9 @@ class ViewController: UIViewController {
         lowestFitness = min(currentFitness, lowestFitness)
         highestFitness = max(currentFitness, highestFitness)
         
-        
-        let canvas = view as Canvas
         println(mostFittest.fitness)
-        canvas.ind = mostFittest
-        canvas.setNeedsDisplay()
+        canvasView.ind = mostFittest
+        canvasView.setNeedsDisplay()
     }
 }
 

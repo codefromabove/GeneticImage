@@ -14,6 +14,7 @@
 		2E52A3B31A374AEA006DBA80 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2E52A3B11A374AEA006DBA80 /* LaunchScreen.xib */; };
 		2E52A3BF1A374AEA006DBA80 /* GeneticImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E52A3BE1A374AEA006DBA80 /* GeneticImageTests.swift */; };
 		2E52A3C91A374B03006DBA80 /* kyle.png in Resources */ = {isa = PBXBuildFile; fileRef = 2E52A3C81A374B03006DBA80 /* kyle.png */; };
+		2E52A3CD1A377FCB006DBA80 /* PropertiestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E52A3CC1A377FCB006DBA80 /* PropertiestViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,6 +39,7 @@
 		2E52A3BD1A374AEA006DBA80 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2E52A3BE1A374AEA006DBA80 /* GeneticImageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneticImageTests.swift; sourceTree = "<group>"; };
 		2E52A3C81A374B03006DBA80 /* kyle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = kyle.png; sourceTree = "<group>"; };
+		2E52A3CC1A377FCB006DBA80 /* PropertiestViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertiestViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +84,7 @@
 				2E52A3C81A374B03006DBA80 /* kyle.png */,
 				2E52A3A81A374AEA006DBA80 /* AppDelegate.swift */,
 				2E52A3AA1A374AEA006DBA80 /* ViewController.swift */,
+				2E52A3CC1A377FCB006DBA80 /* PropertiestViewController.swift */,
 				2E52A3AC1A374AEA006DBA80 /* Main.storyboard */,
 				2E52A3AF1A374AEA006DBA80 /* Images.xcassets */,
 				2E52A3B11A374AEA006DBA80 /* LaunchScreen.xib */,
@@ -216,6 +219,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2E52A3CD1A377FCB006DBA80 /* PropertiestViewController.swift in Sources */,
 				2E52A3AB1A374AEA006DBA80 /* ViewController.swift in Sources */,
 				2E52A3A91A374AEA006DBA80 /* AppDelegate.swift in Sources */,
 			);
