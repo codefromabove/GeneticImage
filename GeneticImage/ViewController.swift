@@ -53,7 +53,7 @@ struct Individual {
     
     init() {
         dna = []
-        for (var g = 0; g < dnaLength; g += geneSize) {
+        for var g = 0; g < dnaLength; g += geneSize {
             dna.extend([
                 _random(),  // R
                 _random(),  // G
@@ -75,9 +75,11 @@ struct Individual {
     }
     
     init(mother: [Float], father: [Float]) {
-        //dna = Array(count: dnaLength, repeatedValue: 0.0)
-        dna = []
+        dna = Array(count: dnaLength, repeatedValue: 0.0) // FAST
+        //dna = []
         let inheritSplit = Int(_random() * Float(dnaLength))
+        
+        //TODO: unsafe stuff with unsafebuffer
         
         for (var i = 0; i < dnaLength; i += geneSize) {
             var inheritedGene: [Float]
@@ -98,8 +100,8 @@ struct Individual {
                     if d < 0.0 { d = 0.0 }
                     if d > 1.0 { d = 1.0 }
                 }
-                
-                dna.append(d)
+                dna[i+j] = d
+                //dna.append(d)
             }
         }
         calcFitness()
@@ -123,7 +125,7 @@ struct Individual {
         var diff = 0
         var p = workingSize * workingSize * 4 - 1
         //
-        for (var i = 0; i < p; i++) {
+        for var i = 0; i < p; i++ {
             if i % 3 == 0 { //ignore alpha
                 //  println(imageData[p])
                 continue
@@ -208,10 +210,11 @@ func seed(var population: Population) -> Population {
         if fittestSurvive {
             population = Array(population[0..<selectCount])
             population.extend(offspring)
+            population = Array(population[0..<size])
+            return population
         } else {
             return offspring
         }
-        population = Array(population[0..<size])
     } else {
         /*
         * Asexual reproduction:
@@ -222,8 +225,8 @@ func seed(var population: Population) -> Population {
         if (child.fitness > parent.fitness) {
             population = [child]
         }
+        return population
     }
-    return population
 }
 
 
