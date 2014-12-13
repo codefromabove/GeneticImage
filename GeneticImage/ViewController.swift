@@ -36,15 +36,35 @@ var geneSize: Int = 4 + vertices * 2
 var dnaLength: Int = polygons * geneSize
 var lowestFitness: Float = 100
 var highestFitness: Float = 0
-var startTime: Int = 0
-
-
 
 /**
 :returns: random float in range 0...1.0
 */
 func _random() -> Float {
     return Float(arc4random_uniform(1000)) / 1000.0
+}
+
+typealias Point = (CGFloat, CGFloat)
+typealias Color = (Float, Float, Float, Float)
+
+struct Nucleotide {
+    let color: Color
+    let vertices: [Point]
+}
+
+func randomColor() -> Color {
+    return (_random(), _random(), _random(), max(_random() * _random(), 0.2))
+}
+
+func randomPolygon(vertices: Int, base: Point) -> [Point]
+{
+    poly = []
+    for var i = 0; i < vertices; i++ {
+        
+    }
+}
+func build() {
+    
 }
 
 struct Individual {
@@ -113,13 +133,6 @@ struct Individual {
         draw(context, rect: CGRectMake(0, 0, CGFloat(workingSize), CGFloat(workingSize)))
         let image = CGBitmapContextCreateImage(context)
         UIGraphicsEndImageContext()
-        
-        //        let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
-        //        let documentDirectory = paths[0] as String
-        //        let myFilePath = documentDirectory.stringByAppendingPathComponent("nameOfMyFile")
-        //        UIImagePNGRepresentation(UIImage(CGImage:image)).writeToFile(myFilePath, atomically: true)
-        //        println(myFilePath)
-        //
         let imageData = rawDataFromCGImage(image)
         
         var diff = 0
@@ -127,7 +140,6 @@ struct Individual {
         //
         for var i = 0; i < p; i++ {
             if i % 3 == 0 { //ignore alpha
-                //  println(imageData[p])
                 continue
             }
             var dp: Int = imageData[i] - workingData[i]
@@ -216,9 +228,7 @@ func seed(var population: Population) -> Population {
             return offspring
         }
     } else {
-        /*
-        * Asexual reproduction:
-        */
+        // Asexual reproduction
         let parent = population.first!
         let child = Individual(mother: parent.dna, father: parent.dna)
         
@@ -322,6 +332,7 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var referenceImageView: UIImageView!
     @IBOutlet weak var canvasView: Canvas!
+    @IBOutlet weak var hud: UITextView!
     
     var population: Population!
 
@@ -332,22 +343,38 @@ class ViewController: UIViewController {
         prepareImage()
         population = (0..<populationSize).map { _ in Individual() }
         
-        let link  = CADisplayLink(target: self, selector: "tick")
-        link.frameInterval = 3;//20fps 60/n = fps
+        let link = CADisplayLink(target: self, selector: "tick")
         link.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
     }
     
     func tick() {
-        population = seed(population)
+        
+        let seedTime = sampleExecutionTime { () -> () in
+            self.population = seed(self.population)
+        }
+        
         let mostFittest = fittest(population)
         
         var currentFitness = mostFittest.fitness * 100.0
         lowestFitness = min(currentFitness, lowestFitness)
         highestFitness = max(currentFitness, highestFitness)
         
-        println(mostFittest.fitness)
+        let seedTimeFormatted = String(format:"%.3fs", seedTime)
+        
+        hud.text =  "Fitenss: \(currentFitness)%\n" +
+                    "Min fitenss: \(lowestFitness)%\n" +
+                    "Max fitenss: \(highestFitness)%\n" +
+                    "Generation time: \(seedTimeFormatted)\n"
+        
         canvasView.ind = mostFittest
         canvasView.setNeedsDisplay()
     }
+}
+
+func sampleExecutionTime(operation:() -> ()) -> NSTimeInterval {
+    let startTime = CFAbsoluteTimeGetCurrent()
+    operation()
+    let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
+    return timeElapsed
 }
 
