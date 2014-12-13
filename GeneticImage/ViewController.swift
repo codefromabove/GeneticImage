@@ -84,7 +84,7 @@ extension Nucleotide {
 // Random
 extension Nucleotide {
     static func random() -> Nucleotide {
-        return Nucleotide(color: randomColor(), polygon: randomPolygon(polygons))
+        return Nucleotide(color: randomColor(), polygon: randomPolygon(vertices))
     }
     
     private static func randomColor() -> Color {
@@ -102,19 +102,20 @@ struct Individual {
     var dna: DNA
     var fitness: Float = 0.0
     
-    init() {
-        dna = (0..<polygons).map { _ in Nucleotide.random() }
+    init(dnaLength: Int) {
+        dna = (0..<dnaLength).map { _ in Nucleotide.random() }
         calcFitness()
     }
     
-    init(mother: Individual, father: Individual) {
-        dna = Array(count: polygons, repeatedValue: mother.dna[0])
+    init(mother: Individual, father: Individual, mutationProbability: Float, randomInheritance: Bool) {
+        let length = mother.dna.count
+        dna = Array(count: length, repeatedValue: mother.dna[0])
         
-        let inheritSplit = Int(_random() * Float(polygons))
+        let inheritSplit = Int(_random() * Float(length))
         
         //TODO: unsafe stuff with unsafebuffer
         
-        for var i = 0; i < polygons; i++ {
+        for var i = 0; i < length; i++ {
             var inheritedGene: [Nucleotide]
             if randomInheritance {
                 /* Randomly inherit genes from parents in an uneven manner */
@@ -123,46 +124,46 @@ struct Individual {
                 /* Inherit genes evenly from both parents */
                 inheritedGene = (_random() < Float(0.5)) ? mother.dna : father.dna
             }
-            
-            var d = inheritedGene[i]
-            
-            if mutationChance > _random() {
-                dna[i] = d.mutate(mutateAmount)
+            if mutationProbability > _random() {
+                dna[i] = inheritedGene[i].mutate(mutateAmount)
             } else {
-                dna[i] = d
+                dna[i] = inheritedGene[i]
             }
         }
         calcFitness()
     }
     
     mutating func calcFitness() {
-        UIGraphicsBeginImageContextWithOptions(CGSizeMake(workingSize, workingSize), true, 1.0)
-        let context = UIGraphicsGetCurrentContext()
-        render(dna, context, CGRectMake(0, 0, workingSize, workingSize))
-        let image = CGBitmapContextCreateImage(context)
-        UIGraphicsEndImageContext()
-        let imageData = rawDataFromCGImage(image)
-        
-        var diff = 0
-        var p = Int(workingSize * workingSize * 4 - 1)
+        fitness = relativeFitness(dna, workingData)
+    }
+}
+
+func relativeFitness(dna: DNA, reference: UnsafeBufferPointer<CUnsignedChar>) -> Float {
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(workingSize, workingSize), true, 1.0)
+    let context = UIGraphicsGetCurrentContext()
+    render(dna, context, CGRectMake(0, 0, workingSize, workingSize))
+    let image = CGBitmapContextCreateImage(context)
+    UIGraphicsEndImageContext()
+    let imageData = rawDataFromCGImage(image)
     
-        for var i = 0; i < p; i++ {
-            if i % 3 == 0 { //ignore alpha
-                continue
-            }
-            var dp: Int = imageData[i] - workingData[i]
-            if (diffSquared) {
-                diff += dp * dp
-            } else {
-                diff += abs(dp)
-            }
+    var diff = 0
+    
+    for var i = 0; i < imageData.count; i++ {
+        if i % 3 == 0 { //ignore alpha
+            continue
         }
-        
-        if diffSquared {
-            fitness = 1.0 - Float(diff) / Float(workingSize * workingSize * 3 * 256 * 256)
+        let dp: Int = imageData[i] - reference[i]
+        if (diffSquared) {
+            diff += dp * dp
         } else {
-            fitness = 1.0 - Float(diff) / Float(workingSize * workingSize * 3 * 256)
+            diff += abs(dp)
         }
+    }
+    
+    if diffSquared {
+        return 1.0 - Float(diff) / Float(workingSize * workingSize * 3 * 256 * 256)
+    } else {
+        return 1.0 - Float(diff) / Float(workingSize * workingSize * 3 * 256)
     }
 }
 
@@ -174,24 +175,25 @@ func render(dna: DNA, context: CGContext, rect: CGRect) {
     CGContextFillRect(context, rect)
     
     for var g = 0; g < dna.count; g++ {
-        let nucleotide = dna[g]
-        let start = nucleotide.polygon[0]
+        let polygon = dna[g].polygon
+        let color = dna[g].color
+        let start = polygon[0]
         
         CGContextMoveToPoint(context, CGFloat(start.x * width), CGFloat(start.y * height))
         
-        for (var i = 1; i < vertices; i++) {
-            let (x, y) = nucleotide.polygon[i]
+        for (var i = 1; i < polygon.count; i++) {
+            let (x, y) = polygon[i]
             CGContextAddLineToPoint(context, x * width, y * height)
         }
         
-        let color = UIColor(red: nucleotide.color.r, green: nucleotide.color.g, blue: nucleotide.color.b, alpha: nucleotide.color.a)
+        let drawColor = UIColor(red: color.r, green: color.g, blue: color.b, alpha: color.a).CGColor
         
         if fillPolygons {
-            CGContextSetFillColorWithColor(context, color.CGColor)
+            CGContextSetFillColorWithColor(context, drawColor)
             CGContextFillPath(context)
         } else {
             CGContextSetLineWidth(context, 1.0);
-            CGContextSetStrokeColorWithColor(context, color.CGColor)
+            CGContextSetStrokeColorWithColor(context, drawColor)
             CGContextStrokePath(context)
         }
     }
@@ -223,7 +225,7 @@ func seed(var population: Population) -> Population {
                 while randIndividual == i {
                     randIndividual = Int(_random() * Float(selectCount))
                 }
-                let ind = Individual(mother: population[i], father: population[randIndividual])
+                let ind = Individual(mother: population[i], father: population[randIndividual], mutationProbability: mutationChance, randomInheritance: randomInheritance)
                 offspring.append(ind)
             }
         }
@@ -237,8 +239,8 @@ func seed(var population: Population) -> Population {
         }
     } else {
         // Asexual reproduction
-        let parent = population.first!
-        let child = Individual(mother: parent, father: parent)
+        let parent = population[0]
+        let child = Individual(mother: parent, father: parent, mutationProbability: mutationChance, randomInheritance: randomInheritance)
         
         if (child.fitness > parent.fitness) {
             population = [child]
@@ -342,7 +344,7 @@ class ViewController: UIViewController {
         referenceImageView.image = UIImage(named: "kyle")
         
         prepareImage()
-        population = (0..<populationSize).map { _ in Individual() }
+        population = (0..<populationSize).map { _ in Individual(dnaLength: polygons) }
         
         let link = CADisplayLink(target: self, selector: "tick")
         link.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
