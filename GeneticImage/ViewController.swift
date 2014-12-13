@@ -49,14 +49,14 @@ func _random() -> CGFloat {
 typealias Point = (x: CGFloat, y: CGFloat)
 typealias Color = (r: CGFloat, g: CGFloat, b: CGFloat, a: CGFloat)
 typealias Polygon = [Point]
-
 typealias Population = [Individual]
+typealias DNA = [Nucleotide]
 
 struct Nucleotide {
     let color: Color
     let polygon: Polygon
-
 }
+
 
 // Mutation
 extension Nucleotide {
@@ -99,7 +99,7 @@ extension Nucleotide {
 
 
 struct Individual {
-    var dna: [Nucleotide]
+    var dna: DNA
     var fitness: Float = 0.0
     
     init() {
@@ -138,7 +138,7 @@ struct Individual {
     mutating func calcFitness() {
         UIGraphicsBeginImageContextWithOptions(CGSizeMake(workingSize, workingSize), true, 1.0)
         let context = UIGraphicsGetCurrentContext()
-        draw(context, rect: CGRectMake(0, 0, workingSize, workingSize))
+        render(dna, context, CGRectMake(0, 0, workingSize, workingSize))
         let image = CGBitmapContextCreateImage(context)
         UIGraphicsEndImageContext()
         let imageData = rawDataFromCGImage(image)
@@ -164,40 +164,37 @@ struct Individual {
             fitness = 1.0 - Float(diff) / Float(workingSize * workingSize * 3 * 256)
         }
     }
+}
+
+func render(dna: DNA, context: CGContext, rect: CGRect) {
+    let width = rect.width
+    let height = rect.height
     
-    func draw(context: CGContext, rect: CGRect) {
-        
-        let width = rect.width
-        let height = rect.height
-        
-        CGContextSetFillColorWithColor(context, UIColor.blackColor().CGColor)
-        CGContextFillRect(context, rect)
-        
-        
-        for var g = 0; g < polygons; g++ {
-            let nucleotide = dna[g]
-            let start = nucleotide.polygon[0]
-            
-            CGContextMoveToPoint(context, CGFloat(start.x * width), CGFloat(start.y * height))
-            
-            for (var i = 1; i < vertices; i++) {
-                let (x, y) = nucleotide.polygon[i]
-                CGContextAddLineToPoint(context, x * width, y * height)
-            }
+    CGContextSetFillColorWithColor(context, UIColor.blackColor().CGColor)
+    CGContextFillRect(context, rect)
     
-            let color = UIColor(red: nucleotide.color.r, green: nucleotide.color.g, blue: nucleotide.color.b, alpha: nucleotide.color.a)
-            
-            if fillPolygons {
-                CGContextSetFillColorWithColor(context, color.CGColor)
-                CGContextFillPath(context)
-            } else {
-                CGContextSetLineWidth(context, 1.0);
-                CGContextSetStrokeColorWithColor(context, color.CGColor)
-                CGContextStrokePath(context)
-            }
+    for var g = 0; g < dna.count; g++ {
+        let nucleotide = dna[g]
+        let start = nucleotide.polygon[0]
+        
+        CGContextMoveToPoint(context, CGFloat(start.x * width), CGFloat(start.y * height))
+        
+        for (var i = 1; i < vertices; i++) {
+            let (x, y) = nucleotide.polygon[i]
+            CGContextAddLineToPoint(context, x * width, y * height)
+        }
+        
+        let color = UIColor(red: nucleotide.color.r, green: nucleotide.color.g, blue: nucleotide.color.b, alpha: nucleotide.color.a)
+        
+        if fillPolygons {
+            CGContextSetFillColorWithColor(context, color.CGColor)
+            CGContextFillPath(context)
+        } else {
+            CGContextSetLineWidth(context, 1.0);
+            CGContextSetStrokeColorWithColor(context, color.CGColor)
+            CGContextStrokePath(context)
         }
     }
-    
 }
 
 func seed(var population: Population) -> Population {
@@ -267,7 +264,9 @@ class Canvas: UIView {
     
     override func drawRect(rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
-        ind?.draw(context, rect: rect)
+        if let ind = ind {
+            render(ind.dna, context, rect)
+        }
     }
 }
 
