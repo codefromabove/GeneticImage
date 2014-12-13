@@ -44,84 +44,92 @@ func _random() -> Float {
     return Float(arc4random_uniform(1000)) / 1000.0
 }
 
-typealias Point = (CGFloat, CGFloat)
-typealias Color = (Float, Float, Float, Float)
+func _random() -> CGFloat {
+    return CGFloat(arc4random_uniform(1000)) / 1000.0
+}
+
+typealias Point = (x: CGFloat, y: CGFloat)
+typealias Color = (r: CGFloat, g: CGFloat, b: CGFloat, a: CGFloat)
+typealias Polygon = [Point]
 
 struct Nucleotide {
     let color: Color
-    let vertices: [Point]
+    let polygon: Polygon
+
 }
 
-func randomColor() -> Color {
-    return (_random(), _random(), _random(), max(_random() * _random(), 0.2))
-}
-
-func randomPolygon(vertices: Int, base: Point) -> [Point]
-{
-    poly = []
-    for var i = 0; i < vertices; i++ {
-        
+// Mutation
+extension Nucleotide {
+    func mutate(amount: Float) -> Nucleotide {
+        return Nucleotide(color: mutateColor(color, amount), polygon: mutatePolygon(polygon, amount))
+    }
+    
+    private func mutateColor(color: Color, _ amount: Float) -> Color {
+        return (mutateValue(amount, color.r), mutateValue(amount, color.g), mutateValue(amount, color.b), mutateValue(amount, color.a))
+    }
+    
+    private func mutatePolygon(polygon: Polygon, _ amount: Float) -> Polygon {
+        let mutatePoint: (p: Point) -> Point = { p in (self.mutateValue(amount, p.x) , self.mutateValue(amount, p.y)) }
+        return polygon.map(mutatePoint)
+    }
+    
+    func mutateValue(amount: Float, _ value: CGFloat) -> CGFloat {
+        var result = value + _random() * CGFloat(amount) * 2.0 - CGFloat(amount)
+        if result < 0.0 { result = 0.0 }
+        if result > 1.0 { result = 1.0 }
+        return result
     }
 }
-func build() {
+
+// Random
+extension Nucleotide {
+    static func random() -> Nucleotide {
+        return Nucleotide(color: randomColor(), polygon: randomPolygon(polygons))
+    }
     
+    private static func randomColor() -> Color {
+        return (_random(), _random(), _random(), max(_random() * _random(), 0.2))
+    }
+    
+    private static func randomPolygon(vertices: Int) -> Polygon {
+        let base: Point = (_random(), _random())
+        return (0..<vertices).map { _ in (base.x + _random() - 0.5, base.y + _random() - 0.5) }
+    }
 }
 
+
 struct Individual {
-    var dna: [Float]
+    var dna: [Nucleotide]
     var fitness: Float = 0.0
     
     init() {
-        dna = []
-        for var g = 0; g < dnaLength; g += geneSize {
-            dna.extend([
-                _random(),  // R
-                _random(),  // G
-                _random(),   // B
-                max(_random() * _random(), 0.2) // A
-                ])
-            
-            let x = _random()
-            let y = _random()
-            
-            for (var j = 0; j < vertices; j++) {
-                dna.extend([
-                    x + _random() - 0.5, //X
-                    y + _random() - 0.5 //Y
-                    ])
-            }
-        }
+        dna = (0..<polygons).map { _ in Nucleotide.random() }
         calcFitness()
     }
     
-    init(mother: [Float], father: [Float]) {
-        dna = Array(count: dnaLength, repeatedValue: 0.0) // FAST
-        //dna = []
-        let inheritSplit = Int(_random() * Float(dnaLength))
+    init(mother: [Nucleotide], father: [Nucleotide]) {
+        dna = Array(count: polygons, repeatedValue: mother[0])
+        
+        let inheritSplit = Int(_random() * Float(polygons))
         
         //TODO: unsafe stuff with unsafebuffer
         
-        for (var i = 0; i < dnaLength; i += geneSize) {
-            var inheritedGene: [Float]
+        for var i = 0; i < polygons; i++ {
+            var inheritedGene: [Nucleotide]
             if randomInheritance {
                 /* Randomly inherit genes from parents in an uneven manner */
                 inheritedGene = (i < inheritSplit) ? mother : father
             } else {
                 /* Inherit genes evenly from both parents */
-                inheritedGene = (_random() < 0.5) ? mother : father
+                inheritedGene = (_random() < Float(0.5)) ? mother : father
             }
             
-            for (var j = 0; j < geneSize; j++) {
-                var d = inheritedGene[i + j]
-                
-                if _random() < mutationChance {
-                    d += _random() * mutateAmount * 2 - mutateAmount
-                    
-                    if d < 0.0 { d = 0.0 }
-                    if d > 1.0 { d = 1.0 }
-                }
-                dna[i+j] = d
-                //dna.append(d)
+            var d = inheritedGene[i]
+            
+            if mutationChance > _random() {
+                dna[i] = d.mutate(mutateAmount)
+            } else {
+                dna[i] = d
             }
         }
         calcFitness()
@@ -159,22 +167,25 @@ struct Individual {
     
     func draw(context: CGContext, rect: CGRect) {
         
-        let width = Float(rect.width)
-        let height = Float(rect.height)
+        let width = rect.width
+        let height = rect.height
         
         CGContextSetFillColorWithColor(context, UIColor.blackColor().CGColor)
         CGContextFillRect(context, rect)
         
         
-        for (var g = 0; g < dnaLength; g += geneSize) {
+        for var g = 0; g < polygons; g++ {
+            let nucleotide = dna[g]
+            let start = nucleotide.polygon[0]
             
-            CGContextMoveToPoint(context, CGFloat(dna[g+4] * width), CGFloat(dna[g+5] * height)) //start at this point
+            CGContextMoveToPoint(context, CGFloat(start.x * width), CGFloat(start.y * height))
             
-            for (var i = 0; i < vertices - 1; i++) {
-                CGContextAddLineToPoint(context, CGFloat(dna[g + i * 2 + 6] * width), CGFloat(dna[g + i * 2 + 7] * height))
+            for (var i = 1; i < vertices; i++) {
+                let (x, y) = nucleotide.polygon[i]
+                CGContextAddLineToPoint(context, x * width, y * height)
             }
-            
-            let color = UIColor(red: CGFloat(dna[g]), green: CGFloat(dna[g+1]), blue: CGFloat(dna[g+2]), alpha: CGFloat(dna[g+3]))
+    
+            let color = UIColor(red: nucleotide.color.r, green: nucleotide.color.g, blue: nucleotide.color.b, alpha: nucleotide.color.a)
             
             if fillPolygons {
                 CGContextSetFillColorWithColor(context, color.CGColor)
