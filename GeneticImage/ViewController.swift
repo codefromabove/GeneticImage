@@ -25,15 +25,13 @@ var diffSquared: Bool = true
 
 /* Graphics options.
 */
-var workingSize: Int = 70
+var workingSize: CGFloat = 70.0
 var polygons: Int = 120
 var vertices: Int = 6
 var fillPolygons: Bool = true
 
 /* Simulation session variables.
 */
-var geneSize: Int = 4 + vertices * 2
-var dnaLength: Int = polygons * geneSize
 var lowestFitness: Float = 100
 var highestFitness: Float = 0
 
@@ -51,6 +49,8 @@ func _random() -> CGFloat {
 typealias Point = (x: CGFloat, y: CGFloat)
 typealias Color = (r: CGFloat, g: CGFloat, b: CGFloat, a: CGFloat)
 typealias Polygon = [Point]
+
+typealias Population = [Individual]
 
 struct Nucleotide {
     let color: Color
@@ -107,8 +107,8 @@ struct Individual {
         calcFitness()
     }
     
-    init(mother: [Nucleotide], father: [Nucleotide]) {
-        dna = Array(count: polygons, repeatedValue: mother[0])
+    init(mother: Individual, father: Individual) {
+        dna = Array(count: polygons, repeatedValue: mother.dna[0])
         
         let inheritSplit = Int(_random() * Float(polygons))
         
@@ -118,10 +118,10 @@ struct Individual {
             var inheritedGene: [Nucleotide]
             if randomInheritance {
                 /* Randomly inherit genes from parents in an uneven manner */
-                inheritedGene = (i < inheritSplit) ? mother : father
+                inheritedGene = (i < inheritSplit) ? mother.dna : father.dna
             } else {
                 /* Inherit genes evenly from both parents */
-                inheritedGene = (_random() < Float(0.5)) ? mother : father
+                inheritedGene = (_random() < Float(0.5)) ? mother.dna : father.dna
             }
             
             var d = inheritedGene[i]
@@ -136,16 +136,16 @@ struct Individual {
     }
     
     mutating func calcFitness() {
-        UIGraphicsBeginImageContextWithOptions(CGSizeMake(CGFloat(workingSize), CGFloat(workingSize)), true, 1.0)
+        UIGraphicsBeginImageContextWithOptions(CGSizeMake(workingSize, workingSize), true, 1.0)
         let context = UIGraphicsGetCurrentContext()
-        draw(context, rect: CGRectMake(0, 0, CGFloat(workingSize), CGFloat(workingSize)))
+        draw(context, rect: CGRectMake(0, 0, workingSize, workingSize))
         let image = CGBitmapContextCreateImage(context)
         UIGraphicsEndImageContext()
         let imageData = rawDataFromCGImage(image)
         
         var diff = 0
-        var p = workingSize * workingSize * 4 - 1
-        //
+        var p = Int(workingSize * workingSize * 4 - 1)
+    
         for var i = 0; i < p; i++ {
             if i % 3 == 0 { //ignore alpha
                 continue
@@ -226,7 +226,7 @@ func seed(var population: Population) -> Population {
                 while randIndividual == i {
                     randIndividual = Int(_random() * Float(selectCount))
                 }
-                let ind = Individual(mother: population[i].dna, father: population[randIndividual].dna)
+                let ind = Individual(mother: population[i], father: population[randIndividual])
                 offspring.append(ind)
             }
         }
@@ -241,7 +241,7 @@ func seed(var population: Population) -> Population {
     } else {
         // Asexual reproduction
         let parent = population.first!
-        let child = Individual(mother: parent.dna, father: parent.dna)
+        let child = Individual(mother: parent, father: parent)
         
         if (child.fitness > parent.fitness) {
             population = [child]
@@ -250,21 +250,14 @@ func seed(var population: Population) -> Population {
     }
 }
 
-
-/**
-:param: individuals: collection of individuals
-
-:returns: Individual with highest fitness
-*/
-
-func fittest(individuals: [Individual]) -> Individual {
-    return individuals.reduce(individuals[0]) { $0.fitness > $1.fitness ? $0 : $1 }
+func fittest(population: Population) -> Individual {
+    return population.reduce(population[0]) { $0.fitness > $1.fitness ? $0 : $1 }
 }
 
 func prepareImage() {
     let image = UIImage(named: "kyle")!
     // TODO: resize preserving aspect
-    let resized = resizeCGImage(image.CGImage, toSize: CGSizeMake(CGFloat(workingSize), CGFloat(workingSize)))
+    let resized = resizeCGImage(image.CGImage, toSize: CGSizeMake(workingSize, workingSize))
     workingData = rawDataFromCGImage(resized)
 }
 
@@ -336,8 +329,6 @@ func rawDataFromCGImage(image: CGImage) -> UnsafeBufferPointer<CUnsignedChar> {
     
     return buffer
 }
-
-typealias Population = [Individual]
 
 class ViewController: UIViewController {
     
