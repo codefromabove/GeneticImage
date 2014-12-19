@@ -16,6 +16,7 @@
 		2E52A3C91A374B03006DBA80 /* kyle.png in Resources */ = {isa = PBXBuildFile; fileRef = 2E52A3C81A374B03006DBA80 /* kyle.png */; };
 		2E5CE4371A443782005AD308 /* CGImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5CE4361A443782005AD308 /* CGImageExtensions.swift */; };
 		2E5CE4391A44416F005AD308 /* GeneticImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5CE4381A44416F005AD308 /* GeneticImage.swift */; };
+		2E5CE43B1A4448AE005AD308 /* CollectionExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5CE43A1A4448AE005AD308 /* CollectionExtensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,6 +43,7 @@
 		2E52A3C81A374B03006DBA80 /* kyle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = kyle.png; sourceTree = "<group>"; };
 		2E5CE4361A443782005AD308 /* CGImageExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGImageExtensions.swift; sourceTree = "<group>"; };
 		2E5CE4381A44416F005AD308 /* GeneticImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneticImage.swift; sourceTree = "<group>"; };
+		2E5CE43A1A4448AE005AD308 /* CollectionExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionExtensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,6 +94,7 @@
 				2E52A3A61A374AEA006DBA80 /* Supporting Files */,
 				2E5CE4361A443782005AD308 /* CGImageExtensions.swift */,
 				2E5CE4381A44416F005AD308 /* GeneticImage.swift */,
+				2E5CE43A1A4448AE005AD308 /* CollectionExtensions.swift */,
 			);
 			path = GeneticImage;
 			sourceTree = "<group>";
@@ -222,6 +225,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2E5CE43B1A4448AE005AD308 /* CollectionExtensions.swift in Sources */,
 				2E52A3AB1A374AEA006DBA80 /* ViewController.swift in Sources */,
 				2E5CE4371A443782005AD308 /* CGImageExtensions.swift in Sources */,
 				2E52A3A91A374AEA006DBA80 /* AppDelegate.swift in Sources */,

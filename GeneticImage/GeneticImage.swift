@@ -19,7 +19,6 @@ var workingData: UnsafeBufferPointer<CUnsignedChar>!
 var selectionCutoff: Float = 0.25
 var mutationChance: Float = 0.024
 var mutateAmount: Float = 0.1
-var fittestSurvive: Bool = false
 var randomInheritance: Bool = false
 var diffSquared: Bool = true
 
@@ -27,7 +26,7 @@ var diffSquared: Bool = true
 */
 var workingSize: CGFloat = 70.0
 var polygons: Int = 120
-var vertices: Int = 6
+var vertices: Int = 3
 var fillPolygons: Bool = true
 
 /**
@@ -193,7 +192,6 @@ func render(dna: DNA, context: CGContext, rect: CGRect) {
         for (x, y) in polygon {
             CGContextAddLineToPoint(context, x * width, y * height)
         }
-
         
         let drawColor = UIColor(red: color.r, green: color.g, blue: color.b, alpha: color.a).CGColor
         
@@ -208,7 +206,7 @@ func render(dna: DNA, context: CGContext, rect: CGRect) {
     }
 }
 
-func seed(var population: Population) -> Population {
+func seed(var population: Population, fittestSurvive: Bool) -> Population {
     if population.count > 1 {
         let size = population.count
         var offspring: Population = [] //TODO: prepopulate with values
@@ -220,6 +218,7 @@ func seed(var population: Population) -> Population {
         
         /* The number of individuals to randomly generate */
         var randomCount = Int(ceil(1.0 / selectionCutoff))
+        
         
         population.sort { $0.fitness > $1.fitness }
         
@@ -271,16 +270,19 @@ class Canvas: UIView {
 }
 
 class GeneticImage: NSObject {
-    var populationSize: Int = 40
     
+    var populationSize: Int = 40
+    var fittestSurvive: Bool = false
+
     var didBreedNewPopulation: ((geneticImage: GeneticImage) -> ())? = nil
     
     var population: Population
-    var currentFitness = 0.0
     var seedTime: NSTimeInterval = 0.0
     var mostFittest: Individual? = nil
     var lowestFitness: Float = 100.0
     var highestFitness: Float = 0.0
+    var currentFitness: Float = 0.0
+    
     
     init(referenceImage: UIImage) {
         // TODO: resize preserving aspect
@@ -291,22 +293,28 @@ class GeneticImage: NSObject {
     }
     
     func run() {
-        let link = CADisplayLink(target: self, selector: "tick")
-        link.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) { () -> Void in
+            while true {
+                self.tick()
+            }
+        }
     }
     
     func tick() {
-        seedTime = sampleExecutionTime { () -> () in
-            self.population = seed(self.population)
+        self.seedTime = sampleExecutionTime { () -> () in
+            self.population = seed(self.population, self.fittestSurvive)
         }
         
-        mostFittest = fittest(population)
+        self.mostFittest = fittest(self.population)
         
-        var currentFitness = mostFittest!.fitness * 100.0
-        lowestFitness = min(currentFitness, lowestFitness)
-        highestFitness = max(currentFitness, highestFitness)
+        self.currentFitness = self.mostFittest!.fitness * 100.0
+        self.lowestFitness = min(self.currentFitness, self.lowestFitness)
+        self.highestFitness = max(self.currentFitness, self.highestFitness)
         
-        didBreedNewPopulation?(geneticImage: self)
+        dispatch_async(dispatch_get_main_queue()) { _ in
+            self.didBreedNewPopulation?(geneticImage: self)
+            return ()
+        }
     }
 }
 
