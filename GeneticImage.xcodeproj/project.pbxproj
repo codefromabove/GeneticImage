@@ -14,6 +14,8 @@
 		2E52A3B31A374AEA006DBA80 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2E52A3B11A374AEA006DBA80 /* LaunchScreen.xib */; };
 		2E52A3BF1A374AEA006DBA80 /* GeneticImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E52A3BE1A374AEA006DBA80 /* GeneticImageTests.swift */; };
 		2E52A3C91A374B03006DBA80 /* kyle.png in Resources */ = {isa = PBXBuildFile; fileRef = 2E52A3C81A374B03006DBA80 /* kyle.png */; };
+		2E5CE4371A443782005AD308 /* CGImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5CE4361A443782005AD308 /* CGImageExtensions.swift */; };
+		2E5CE4391A44416F005AD308 /* GeneticImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5CE4381A44416F005AD308 /* GeneticImage.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,6 +40,8 @@
 		2E52A3BD1A374AEA006DBA80 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2E52A3BE1A374AEA006DBA80 /* GeneticImageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneticImageTests.swift; sourceTree = "<group>"; };
 		2E52A3C81A374B03006DBA80 /* kyle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = kyle.png; sourceTree = "<group>"; };
+		2E5CE4361A443782005AD308 /* CGImageExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGImageExtensions.swift; sourceTree = "<group>"; };
+		2E5CE4381A44416F005AD308 /* GeneticImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneticImage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,6 +90,8 @@
 				2E52A3AF1A374AEA006DBA80 /* Images.xcassets */,
 				2E52A3B11A374AEA006DBA80 /* LaunchScreen.xib */,
 				2E52A3A61A374AEA006DBA80 /* Supporting Files */,
+				2E5CE4361A443782005AD308 /* CGImageExtensions.swift */,
+				2E5CE4381A44416F005AD308 /* GeneticImage.swift */,
 			);
 			path = GeneticImage;
 			sourceTree = "<group>";
@@ -217,7 +223,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				2E52A3AB1A374AEA006DBA80 /* ViewController.swift in Sources */,
+				2E5CE4371A443782005AD308 /* CGImageExtensions.swift in Sources */,
 				2E52A3A91A374AEA006DBA80 /* AppDelegate.swift in Sources */,
+				2E5CE4391A44416F005AD308 /* GeneticImage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
