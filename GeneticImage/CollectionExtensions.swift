@@ -9,7 +9,7 @@
 import Foundation
 
 extension Array {
-    func concurrentMap<U>(chunks: Int, transform: (T) -> U, callback: (SequenceOf<U>) -> ()) {
+    func concurrentMap<U>(chunks: Int, transform: (T) -> U, callback: (Array<U>) -> ()) {
         let queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
         let group = dispatch_group_create()
         
@@ -30,10 +30,33 @@ extension Array {
                     }
                 }
             }
+        }
+        
+        dispatch_group_notify(group, queue) {
+            callback(results)
+        }
+    }
+    
+    func concurrent<U>(transform: (T) -> U,
+        callback: (Array<U>) -> ()) {
+            let queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
+            let group = dispatch_group_create()
+            
+            // populate the array
+            let r = transform(self[0] as T)
+            var results = Array<U>(count: self.count, repeatedValue:r)
+            
+            results.withUnsafeMutableBufferPointer {
+                (inout buffer: UnsafeMutableBufferPointer<U>) -> () in
+                for (index, item) in enumerate(self[1..<self.count-1]) {
+                    dispatch_group_async(group, queue) {
+                        buffer[index] = transform(item)
+                    }
+                }
+            }
             
             dispatch_group_notify(group, queue) {
-                callback(SequenceOf(buffer))
+                callback(results)
             }
-        }
     }
 }

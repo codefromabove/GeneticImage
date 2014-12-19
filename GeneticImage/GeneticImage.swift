@@ -112,7 +112,7 @@ struct Individual {
     
     init(dnaLength: Int) {
         dna = (0..<dnaLength).map { _ in Nucleotide.random() }
-        calcFitness()
+       // calcFitness()
     }
     
     init(mother: Individual, father: Individual, mutationProbability: Float, randomInheritance: Bool) {
@@ -138,7 +138,7 @@ struct Individual {
                 dna[i] = inheritedGene[i]
             }
         }
-        calcFitness()
+       // calcFitness()
     }
     
     mutating func calcFitness() {
@@ -206,55 +206,60 @@ func render(dna: DNA, context: CGContext, rect: CGRect) {
     }
 }
 
-func seed(var population: Population, fittestSurvive: Bool) -> Population {
-    if population.count > 1 {
-        let size = population.count
-        var offspring: Population = [] //TODO: prepopulate with values
-        
-        /* The number of individuals from the current generation to select for
-        * breeding
-        */
-        let selectCount = Int(floorf(Float(size) * selectionCutoff))
-        
-        /* The number of individuals to randomly generate */
-        var randomCount = Int(ceil(1.0 / selectionCutoff))
-        
-        
-        population.sort { $0.fitness > $1.fitness }
-        
-        if fittestSurvive {
-            randomCount -= 1
-        }
-        
-        for var i = 0; i < selectCount; i++ {
-            for var j = 0; j < randomCount; j++ {
-                var randIndividual = i
-                
-                while randIndividual == i {
-                    randIndividual = Int(_random() * Float(selectCount))
-                }
-                let ind = Individual(mother: population[i], father: population[randIndividual], mutationProbability: mutationChance, randomInheritance: randomInheritance)
-                offspring.append(ind)
-            }
-        }
-        if fittestSurvive {
-            population = Array(population[0..<selectCount])
-            population.extend(offspring)
-            population = Array(population[0..<size])
-            return population
-        } else {
-            return offspring
-        }
+func seed(p: Population, fittestSurvive: Bool) -> Population {
+    if p.count > 1 {
+        return breed(p, fittestSurvive)
     } else {
-        // Asexual reproduction
-        let parent = population[0]
-        let child = Individual(mother: parent, father: parent, mutationProbability: mutationChance, randomInheritance: randomInheritance)
-        
-        if (child.fitness > parent.fitness) {
-            population = [child]
-        }
-        return population
+        return asexualBreed(p)
     }
+}
+
+func breed(var population: Population, fittestSurvive: Bool) -> Population {
+    let size = population.count
+    var offspring: Population = [] //TODO: prepopulate with values
+    
+    /* The number of individuals from the current generation to select for
+    * breeding
+    */
+    let selectCount = Int(floorf(Float(size) * selectionCutoff))
+    
+    /* The number of individuals to randomly generate */
+    var randomCount = Int(ceil(1.0 / selectionCutoff))
+    
+    
+    if fittestSurvive {
+        randomCount -= 1
+    }
+    
+    for var i = 0; i < selectCount; i++ {
+        for var j = 0; j < randomCount; j++ {
+            var randIndividual = i
+            
+            while randIndividual == i {
+                randIndividual = Int(_random() * Float(selectCount))
+            }
+            let ind = Individual(mother: population[i], father: population[randIndividual], mutationProbability: mutationChance, randomInheritance: randomInheritance)
+            offspring.append(ind)
+        }
+    }
+    if fittestSurvive {
+        population = Array(population[0..<selectCount])
+        population.extend(offspring)
+        population = Array(population[0..<size])
+        return population
+    } else {
+        return offspring
+    }
+}
+
+func asexualBreed(var p: Population) -> Population {
+    let parent = p[0]
+    let child = Individual(mother: parent, father: parent, mutationProbability: mutationChance, randomInheritance: randomInheritance)
+    
+    if (child.fitness > parent.fitness) {
+        p = [child]
+    }
+    return p
 }
 
 func fittest(population: Population) -> Individual {
@@ -274,7 +279,7 @@ class GeneticImage: NSObject {
     var populationSize: Int = 40
     var fittestSurvive: Bool = false
 
-    var didBreedNewPopulation: ((geneticImage: GeneticImage) -> ())? = nil
+    var didBreedNewPopulation: ((g: GeneticImage) -> ())? = nil
     
     var population: Population
     var seedTime: NSTimeInterval = 0.0
@@ -293,34 +298,31 @@ class GeneticImage: NSObject {
     }
     
     func run() {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) { () -> Void in
-            while true {
-                self.tick()
-            }
-        }
+        
+        let startTime = CFAbsoluteTimeGetCurrent()
+        
+        self.population.concurrentMap(10, { (var i: Individual) -> Individual in
+            i.fitness = relativeFitness(i.dna, workingData)
+                return i
+            },
+            { (var a: [Individual]) -> () in
+                a.sort { $0.fitness > $1.fitness }
+                
+                self.mostFittest = fittest(a)
+                
+                self.currentFitness = self.mostFittest!.fitness * 100.0
+                self.lowestFitness = min(self.currentFitness, self.lowestFitness)
+                self.highestFitness = max(self.currentFitness, self.highestFitness)
+                
+                self.population = seed(a, self.fittestSurvive)
+                
+                self.seedTime = CFAbsoluteTimeGetCurrent() - startTime
+                
+                dispatch_sync(dispatch_get_main_queue()) { _ in
+                    self.didBreedNewPopulation?(g: self)
+                    self.run()
+                }
+                
+        })
     }
-    
-    func tick() {
-        self.seedTime = sampleExecutionTime { () -> () in
-            self.population = seed(self.population, self.fittestSurvive)
-        }
-        
-        self.mostFittest = fittest(self.population)
-        
-        self.currentFitness = self.mostFittest!.fitness * 100.0
-        self.lowestFitness = min(self.currentFitness, self.lowestFitness)
-        self.highestFitness = max(self.currentFitness, self.highestFitness)
-        
-        dispatch_async(dispatch_get_main_queue()) { _ in
-            self.didBreedNewPopulation?(geneticImage: self)
-            return ()
-        }
-    }
-}
-
-func sampleExecutionTime(operation:() -> ()) -> NSTimeInterval {
-    let startTime = CFAbsoluteTimeGetCurrent()
-    operation()
-    let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
-    return timeElapsed
 }
