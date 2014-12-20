@@ -13,6 +13,7 @@ build/
 !default.perspectivev3
 xcuserdata
 *.xccheckout
+<<<<<<< HEAD
 profile
 *.moved-aside
 DerivedData
@@ -24,3 +25,8 @@ Pods
 
 # AppCode
 .idea/
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
