@@ -8,29 +8,30 @@
 
 import UIKit
 import XCTest
+import GeneticImage
 
 class GeneticImageTests: XCTestCase {
     
+    var genetic: GeneticImage!
+    
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        genetic = GeneticImage(referenceImage: UIImage(named: "kyle")!)
     }
     
-    override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-        super.tearDown()
-    }
-    
-    func testExample() {
-        // This is an example of a functional test case.
-        XCTAssert(true, "Pass")
-    }
-    
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measureBlock() {
-            // Put the code you want to measure the time of here.
+    func testTickPerformance() {
+        self.measureMetrics([XCTPerformanceMetric_WallClockTime], automaticallyStartMeasuring: false) { () -> Void in
+            let readyExpectation = self.expectationWithDescription("ready")
+            self.genetic.didBreedNewPopulation = { _ in
+                readyExpectation.fulfill()
+            }
+            self.startMeasuring()
+            
+            self.genetic.tick()
+            
+            self.waitForExpectationsWithTimeout(1, { error in
+                self.stopMeasuring()
+            })
         }
     }
-    
 }

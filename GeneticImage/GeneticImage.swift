@@ -33,11 +33,16 @@ var fillPolygons: Bool = true
 :returns: random float in range 0...1.0
 */
 func _random() -> Float {
-    return Float(arc4random_uniform(1000)) / 1000.0
+    let r : CGFloat = _random()
+    return Float(r)
 }
 
 func _random() -> CGFloat {
-    return CGFloat(arc4random_uniform(1000)) / 1000.0
+    if NSClassFromString("XCTestCase") == nil {
+        return CGFloat(arc4random_uniform(1000)) / 1000.0
+    } else {
+        return 1
+    }
 }
 
 func toDictionary<E, K, V>(
@@ -57,7 +62,7 @@ func toDictionary<E, K, V>(
 typealias Point = (x: CGFloat, y: CGFloat)
 typealias Color = (r: CGFloat, g: CGFloat, b: CGFloat, a: CGFloat)
 typealias Polygon = [Point]
-typealias Population = [Individual]
+public typealias Population = [Individual]
 typealias DNA = [Nucleotide]
 
 struct Nucleotide {
@@ -106,7 +111,7 @@ extension Nucleotide {
 }
 
 
-struct Individual {
+public struct Individual {
     var dna: DNA
     var fitness: Float = 0.0
     
@@ -206,7 +211,7 @@ func render(dna: DNA, context: CGContext, rect: CGRect) {
     }
 }
 
-func seed(var population: Population, fittestSurvive: Bool) -> Population {
+public func seed(var population: Population, fittestSurvive: Bool) -> Population {
     if population.count > 1 {
         let size = population.count
         var offspring: Population = [] //TODO: prepopulate with values
@@ -269,12 +274,12 @@ class Canvas: UIView {
     }
 }
 
-class GeneticImage: NSObject {
+public class GeneticImage: NSObject {
     
     var populationSize: Int = 40
     var fittestSurvive: Bool = false
 
-    var didBreedNewPopulation: ((geneticImage: GeneticImage) -> ())? = nil
+    public var didBreedNewPopulation: ((geneticImage: GeneticImage) -> ())? = nil
     
     var population: Population
     var seedTime: NSTimeInterval = 0.0
@@ -284,7 +289,7 @@ class GeneticImage: NSObject {
     var currentFitness: Float = 0.0
     
     
-    init(referenceImage: UIImage) {
+    public init(referenceImage: UIImage) {
         // TODO: resize preserving aspect
         let resized = resizeCGImage(referenceImage.CGImage, toSize: CGSizeMake(workingSize, workingSize))
         workingData = rawDataFromCGImage(resized)
@@ -292,7 +297,7 @@ class GeneticImage: NSObject {
         population = (0..<populationSize).map { _ in Individual(dnaLength: polygons) }
     }
     
-    func run() {
+    public func run() {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) { () -> Void in
             while true {
                 self.tick()
@@ -300,7 +305,7 @@ class GeneticImage: NSObject {
         }
     }
     
-    func tick() {
+    public func tick() {
         self.seedTime = sampleExecutionTime { () -> () in
             self.population = seed(self.population, self.fittestSurvive)
         }

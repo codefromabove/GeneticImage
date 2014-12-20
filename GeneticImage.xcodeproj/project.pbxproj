@@ -17,6 +17,7 @@
 		2E5CE4371A443782005AD308 /* CGImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5CE4361A443782005AD308 /* CGImageExtensions.swift */; };
 		2E5CE4391A44416F005AD308 /* GeneticImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5CE4381A44416F005AD308 /* GeneticImage.swift */; };
 		2E5CE43B1A4448AE005AD308 /* CollectionExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5CE43A1A4448AE005AD308 /* CollectionExtensions.swift */; };
+		2ED3FE5D1A4488C70093D8EF /* kyle.png in Resources */ = {isa = PBXBuildFile; fileRef = 2E52A3C81A374B03006DBA80 /* kyle.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -215,6 +216,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2ED3FE5D1A4488C70093D8EF /* kyle.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
