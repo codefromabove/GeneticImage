@@ -29,7 +29,7 @@ class GeneticImageTests: XCTestCase {
             
             self.genetic.tick()
             
-            self.waitForExpectationsWithTimeout(1, { error in
+            self.waitForExpectationsWithTimeout(1, handler: { error in
                 self.stopMeasuring()
             })
         }

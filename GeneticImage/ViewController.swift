@@ -21,7 +21,7 @@ class ViewController: UIViewController {
         
         canvasView.drawCallback = { view, context, rect in
             if let fittest = self.geneticImage.mostFittest?.dna {
-                render(fittest, context, rect)
+                render(fittest, context: context, rect: rect)
             }
         }
         
